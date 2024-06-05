@@ -1,13 +1,11 @@
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -31,5 +29,18 @@ public class TESPlayritePropertiesTest {
         assertEquals(true, playrite.isHeadless());
         assertNotNull(playrite.getDriverBinaryPathLinux());
         assertNotNull(playrite.getDriverBinaryPathWindows());
+    }
+}
+
+@Configuration
+class TestConfig {
+    @Bean
+    public Playrite playrite() {
+        Playrite playrite = new Playrite();
+        playrite.setRemoteMode(true);
+        playrite.setBrowser(BrowserCategory.CHROME);
+        playrite.setHeadless(true);
+        // Set other properties as needed
+        return playrite;
     }
 }
