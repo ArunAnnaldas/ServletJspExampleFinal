@@ -1,59 +1,51 @@
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
+import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.EncodedResource;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
-import java.lang.reflect.Field;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-public class TestPropertiesTest {
+@RunWith(MockitoJUnitRunner.class)
+public class YamlPropertySourceFactoryTest {
 
     @Mock
-    private Logger loggerTestProperties;
+    private EncodedResource encodedResource;
 
-    @InjectMocks
-    private TestProperties testProperties;
+    @Mock
+    private Resource resource;
 
-    private Properties mockProps;
+    private YamlPropertySourceFactory factory;
 
-    @BeforeEach
-    public void setUp() throws Exception {
-        mockProps = new Properties();
-        mockProps.setProperty("testKey", "testValue");
-
-        // Use reflection to set the private static userProps field
-        Field field = TestProperties.class.getDeclaredField("userProps");
-        field.setAccessible(true);
-        field.set(null, mockProps);
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+        factory = new YamlPropertySourceFactory();
     }
 
     @Test
-    public void testGetProperty() {
-        String value = TestProperties.getProperty("testKey");
-        assertEquals("testValue", value);
-        verify(loggerTestProperties).info("Overriding testKey with global property value testValue");
-    }
+    public void testCreatePropertySource() throws IOException {
+        when(encodedResource.getResource()).thenReturn(resource);
+        when(resource.getFilename()).thenReturn("test.yaml");
 
-    @Test
-    public void testGetPropertyNotFound() {
-        String value = TestProperties.getProperty("nonExistentKey");
-        assertNull(value);
-        verify(loggerTestProperties).warn("Property nonExistentKey is not found");
-    }
+        Properties properties = new Properties();
+        properties.setProperty("testKey", "testValue");
 
-    @Test
-    public void testSetProperty() {
-        String value = TestProperties.setProperty("newKey", "newValue");
-        assertEquals("newValue", value);
-        assertEquals("newValue", TestProperties.getProperty("newKey"));
+        YamlPropertiesFactoryBean yamlFactory = mock(YamlPropertiesFactoryBean.class);
+        when(yamlFactory.getObject()).thenReturn(properties);
+
+        PropertySource<?> propertySource = factory.createPropertySource(null, encodedResource);
+        
+        assertNotNull(propertySource);
+        assertTrue(propertySource.containsProperty("testKey"));
+        assertEquals("testValue", propertySource.getProperty("testKey"));
     }
 }
