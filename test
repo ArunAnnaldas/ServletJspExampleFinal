@@ -21,9 +21,6 @@ public class YamlPropertySourceFactoryTest {
     @Mock
     private EncodedResource encodedResource;
 
-    @Mock
-    private Resource resource;
-
     private YamlPropertySourceFactory factory;
 
     @Before
@@ -34,12 +31,14 @@ public class YamlPropertySourceFactoryTest {
 
     @Test
     public void testCreatePropertySource() throws IOException {
-        // Assuming there's a valid test.yaml file in src/test/resources
-        when(encodedResource.getResource()).thenReturn(new ClassPathResource("test.yaml"));
-        when(resource.getFilename()).thenReturn("test.yaml");
+        // Arrange
+        Resource resource = new ClassPathResource("test.yaml");
+        when(encodedResource.getResource()).thenReturn(resource);
 
+        // Act
         PropertySource<?> propertySource = factory.createPropertySource(null, encodedResource);
-        
+
+        // Assert
         assertNotNull(propertySource);
         assertTrue(propertySource.containsProperty("testKey"));
         assertEquals("testValue", propertySource.getProperty("testKey"));
