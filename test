@@ -1,21 +1,22 @@
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
 public class TESPlayritePropertiesTest {
 
-    @Autowired
     private TESPlayriteProperties tesPlayriteProperties;
+
+    @Before
+    public void setup() {
+        tesPlayriteProperties = new TESPlayriteProperties();
+        TESPlayriteProperties.Playrite playrite = new TESPlayriteProperties.Playrite();
+        playrite.setRemoteMode(true);
+        playrite.setBrowser(BrowserCategory.CHROME);
+        playrite.setHeadless(true);
+        tesPlayriteProperties.setPlayrite(playrite);
+    }
 
     @Test
     public void testPlayriteProperties() {
@@ -26,20 +27,5 @@ public class TESPlayritePropertiesTest {
         assertEquals("Remote mode is not true", true, tesPlayriteProperties.getPlayrite().isRemoteMode());
         assertEquals("Browser is not CHROME", BrowserCategory.CHROME, tesPlayriteProperties.getPlayrite().getBrowser());
         assertEquals("Headless mode is not true", true, tesPlayriteProperties.getPlayrite().isHeadless());
-    }
-
-    @Configuration
-    @Import(TESPlayriteProperties.class)
-    static class TestConfig {
-        @Bean
-        public TESPlayriteProperties tesPlayriteProperties() {
-            TESPlayriteProperties properties = new TESPlayriteProperties();
-            TESPlayriteProperties.Playrite playrite = new TESPlayriteProperties.Playrite();
-            playrite.setRemoteMode(true);
-            playrite.setBrowser(BrowserCategory.CHROME);
-            playrite.setHeadless(true);
-            properties.setPlayrite(playrite);
-            return properties;
-        }
     }
 }
