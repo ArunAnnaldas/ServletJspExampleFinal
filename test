@@ -1,42 +1,35 @@
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
+import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.core.env.PropertySource;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.EncodedResource;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
-import java.io.IOException;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.class)
-public class YamlPropertySourceFactoryTest {
+@SpringBootTest
+public class TESPlayritePropertiesTest {
 
-    private YamlPropertySourceFactory factory;
+    @InjectMocks
+    private TESPlayriteProperties tesPlayriteProperties;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        factory = new YamlPropertySourceFactory();
-    }
+    @Autowired
+    private Playrite playrite;
 
     @Test
-    public void testCreatePropertySource() throws IOException {
-        // Arrange
-        Resource resource = new ClassPathResource("test.yaml");
-        EncodedResource encodedResource = new EncodedResource(resource);
-
-        // Act
-        PropertySource<?> propertySource = factory.createPropertySource(null, encodedResource);
-
-        // Assert
-        assertNotNull(propertySource);
-        assertTrue(propertySource.containsProperty("testKey"));
-        assertEquals("testValue", propertySource.getProperty("testKey"));
+    public void testPlayriteProperties() {
+        assertNotNull(tesPlayriteProperties);
+        assertNotNull(playrite);
+        assertEquals(true, playrite.isRemoteMode());
+        assertEquals(BrowserCategory.CHROME, playrite.getBrowser());
+        assertEquals(true, playrite.isHeadless());
+        assertNotNull(playrite.getDriverBinaryPathLinux());
+        assertNotNull(playrite.getDriverBinaryPathWindows());
     }
 }
