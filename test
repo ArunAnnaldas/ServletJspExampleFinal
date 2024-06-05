@@ -1,18 +1,20 @@
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
-import com.microsoft.playwright.Browser;
-import com.microsoft.playwright.BrowserContext;
-import com.microsoft.playwright.Page;
-import com.microsoft.playwright.Playwright;
-import net.jpmc.tesautotools.spartan.webpro.core.config.BrowserCategory;
+import com.microsoft.playwright.*;
+import io.cucumber.spring.ScenarioScope;
 import net.jpmc.tesautotools.spartan.webpro.core.config.TESPlayriteProperties;
+import net.jpmc.tesautotools.spartan.webpro.core.framework.BrowserCategory;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.context.junit4.SpringRunner;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
+@RunWith(SpringRunner.class)
+@ScenarioScope
 public class BrowserFactoryTest {
 
     @InjectMocks
@@ -23,6 +25,9 @@ public class BrowserFactoryTest {
 
     @Mock
     private Playwright playwright;
+
+    @Mock
+    private Playwright.BrowserType browserType;
 
     @Mock
     private Browser browser;
@@ -36,17 +41,21 @@ public class BrowserFactoryTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(playwright.chromium()).thenReturn(browser);
+        when(playwright.chromium()).thenReturn(browserType);
+        when(browserType.launch(any())).thenReturn(browser);
         when(browser.newContext()).thenReturn(browserContext);
         when(browserContext.newPage()).thenReturn(page);
     }
 
     @Test
     public void testGetBrowser() {
-        when(tesPlayriteProperties.getPlayrite().getBrowser()).thenReturn(BrowserCategory.chrome);
-        when(tesPlayriteProperties.getPlayrite().isHeadless()).thenReturn(true);
+        TESPlayriteProperties.Playrite playrite = new TESPlayriteProperties.Playrite();
+        playrite.setBrowser(BrowserCategory.chrome);
+        playrite.setHeadless(true);
 
-        Page result = browserFactory.getBrowser(tesPlayriteProperties.getPlayrite().getBrowser(), tesPlayriteProperties.getPlayrite().isHeadless());
+        when(tesPlayriteProperties.getPlayrite()).thenReturn(playrite);
+
+        Page result = browserFactory.getBrowser(playrite.getBrowser(), playrite.isHeadless());
 
         assertNotNull(result);
     }
@@ -62,6 +71,8 @@ public class BrowserFactoryTest {
 
     @Test
     public void testCountOfBrowserContext() {
+        when(browser.contexts().size()).thenReturn(1);
+
         int count = browserFactory.countOfBrowserContext(browser);
 
         assertEquals(1, count);
@@ -69,6 +80,8 @@ public class BrowserFactoryTest {
 
     @Test
     public void testIsBrowserConnected() {
+        when(browser.isConnected()).thenReturn(true);
+
         boolean isConnected = browserFactory.isBrowserConnected(browser);
 
         assertTrue(isConnected);
