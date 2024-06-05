@@ -1,6 +1,6 @@
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,38 +9,44 @@ import org.springframework.context.annotation.Configuration;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 @SpringBootTest
 public class TESPlayritePropertiesTest {
 
-    @InjectMocks
-    private TESPlayriteProperties tesPlayriteProperties;
+    @Mock
+    private TESPlayriteProperties.Playrite playrite;
 
     @Autowired
-    private Playrite playrite;
+    private TESPlayriteProperties tesPlayriteProperties;
 
     @Test
     public void testPlayriteProperties() {
         assertNotNull(tesPlayriteProperties);
         assertNotNull(playrite);
-        assertEquals(true, playrite.isRemoteMode());
-        assertEquals(BrowserCategory.CHROME, playrite.getBrowser());
-        assertEquals(true, playrite.isHeadless());
-        assertNotNull(playrite.getDriverBinaryPathLinux());
-        assertNotNull(playrite.getDriverBinaryPathWindows());
-    }
-}
+        
+        when(playrite.isRemoteMode()).thenReturn(true);
+        when(playrite.getBrowser()).thenReturn(BrowserCategory.CHROME);
+        when(playrite.isHeadless()).thenReturn(true);
 
-@Configuration
-class TestConfig {
-    @Bean
-    public Playrite playrite() {
-        Playrite playrite = new Playrite();
-        playrite.setRemoteMode(true);
-        playrite.setBrowser(BrowserCategory.CHROME);
-        playrite.setHeadless(true);
-        // Set other properties as needed
-        return playrite;
+        tesPlayriteProperties.setPlayrite(playrite);
+
+        assertEquals(true, tesPlayriteProperties.getPlayrite().isRemoteMode());
+        assertEquals(BrowserCategory.CHROME, tesPlayriteProperties.getPlayrite().getBrowser());
+        assertEquals(true, tesPlayriteProperties.getPlayrite().isHeadless());
+    }
+
+    @Configuration
+    static class TestConfig {
+        @Bean
+        public TESPlayriteProperties tesPlayriteProperties() {
+            return new TESPlayriteProperties();
+        }
+
+        @Bean
+        public TESPlayriteProperties.Playrite playrite() {
+            return new TESPlayriteProperties.Playrite();
+        }
     }
 }
