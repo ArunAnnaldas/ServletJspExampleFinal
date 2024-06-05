@@ -5,6 +5,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 
@@ -33,14 +34,9 @@ public class YamlPropertySourceFactoryTest {
 
     @Test
     public void testCreatePropertySource() throws IOException {
-        when(encodedResource.getResource()).thenReturn(resource);
+        // Assuming there's a valid test.yaml file in src/test/resources
+        when(encodedResource.getResource()).thenReturn(new ClassPathResource("test.yaml"));
         when(resource.getFilename()).thenReturn("test.yaml");
-
-        Properties properties = new Properties();
-        properties.setProperty("testKey", "testValue");
-
-        YamlPropertiesFactoryBean yamlFactory = mock(YamlPropertiesFactoryBean.class);
-        when(yamlFactory.getObject()).thenReturn(properties);
 
         PropertySource<?> propertySource = factory.createPropertySource(null, encodedResource);
         
