@@ -1,6 +1,8 @@
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,11 +17,16 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 public class TESPlayritePropertiesTest {
 
+    @Autowired
+    private TESPlayriteProperties tesPlayriteProperties;
+
     @Mock
     private TESPlayriteProperties.Playrite playrite;
 
-    @Autowired
-    private TESPlayriteProperties tesPlayriteProperties;
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @Test
     public void testPlayriteProperties() {
