@@ -1,31 +1,57 @@
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
+import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.Page;
+import net.jpmc.tesautotools.spartan.webpro.core.config.BrowserCategory;
+import net.jpmc.tesautotools.spartan.webpro.core.config.TESPlayriteProperties;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+public class HooksTest {
 
-public class TESPlayritePropertiesTest {
+    @InjectMocks
+    private Hooks hooks;
 
+    @Mock
+    private Logger logger;
+
+    @Mock
+    private BrowserFactory browserFactory;
+
+    @Mock
     private TESPlayriteProperties tesPlayriteProperties;
+
+    @Mock
+    private Page page;
 
     @Before
     public void setup() {
-        tesPlayriteProperties = new TESPlayriteProperties();
-        TESPlayriteProperties.Playrite playrite = new TESPlayriteProperties.Playrite();
-        playrite.setRemoteMode(true);
-        playrite.setBrowser(BrowserCategory.CHROME);
-        playrite.setHeadless(true);
-        tesPlayriteProperties.setPlayrite(playrite);
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void testPlayriteProperties() {
-        assertNotNull("TESPlayriteProperties is null", tesPlayriteProperties);
-        assertNotNull("Playrite is null", tesPlayriteProperties.getPlayrite());
+    public void testGetPage() {
+        // Mocking the behavior of tesPlayriteProperties
+        when(tesPlayriteProperties.getPlayrite()).thenReturn(new TESPlayriteProperties.Playrite());
+        when(tesPlayriteProperties.getPlayrite().isRemoteMode()).thenReturn(true);
 
-        // Test assertions
-        assertEquals("Remote mode is not true", true, tesPlayriteProperties.getPlayrite().isRemoteMode());
-        assertEquals("Browser is not CHROME", BrowserCategory.CHROME, tesPlayriteProperties.getPlayrite().getBrowser());
-        assertEquals("Headless mode is not true", true, tesPlayriteProperties.getPlayrite().isHeadless());
+        Page result = hooks.getPage();
+
+        assertNull(result);
+    }
+
+    @Test
+    public void testClose() {
+        hooks.close();
+
+        // Verify that the close method of Page is called
+        verify(page).close();
+        // Verify that the cleanContext method of BrowserFactory is called
+        verify(browserFactory).cleanContext();
     }
 }
