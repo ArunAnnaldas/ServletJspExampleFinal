@@ -1,8 +1,10 @@
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserContext;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Playwright;
 import net.jpmc.tesautotools.spartan.webpro.core.config.BrowserCategory;
 import net.jpmc.tesautotools.spartan.webpro.core.config.TESPlayriteProperties;
 import org.junit.Before;
@@ -10,21 +12,23 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.slf4j.Logger;
 
-public class HooksTest {
+public class BrowserFactoryTest {
 
     @InjectMocks
-    private Hooks hooks;
-
-    @Mock
-    private Logger logger;
-
-    @Mock
     private BrowserFactory browserFactory;
 
     @Mock
     private TESPlayriteProperties tesPlayriteProperties;
+
+    @Mock
+    private Playwright playwright;
+
+    @Mock
+    private Browser browser;
+
+    @Mock
+    private BrowserContext browserContext;
 
     @Mock
     private Page page;
@@ -32,26 +36,41 @@ public class HooksTest {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        when(playwright.chromium()).thenReturn(browser);
+        when(browser.newContext()).thenReturn(browserContext);
+        when(browserContext.newPage()).thenReturn(page);
     }
 
     @Test
-    public void testGetPage() {
-        // Mocking the behavior of tesPlayriteProperties
-        when(tesPlayriteProperties.getPlayrite()).thenReturn(new TESPlayriteProperties.Playrite());
-        when(tesPlayriteProperties.getPlayrite().isRemoteMode()).thenReturn(true);
+    public void testGetBrowser() {
+        when(tesPlayriteProperties.getPlayrite().getBrowser()).thenReturn(BrowserCategory.chrome);
+        when(tesPlayriteProperties.getPlayrite().isHeadless()).thenReturn(true);
 
-        Page result = hooks.getPage();
+        Page result = browserFactory.getBrowser(tesPlayriteProperties.getPlayrite().getBrowser(), tesPlayriteProperties.getPlayrite().isHeadless());
 
-        assertNull(result);
+        assertNotNull(result);
     }
 
     @Test
-    public void testClose() {
-        hooks.close();
+    public void testCleanContext() {
+        browserFactory.cleanContext();
 
-        // Verify that the close method of Page is called
-        verify(page).close();
-        // Verify that the cleanContext method of BrowserFactory is called
-        verify(browserFactory).cleanContext();
+        verify(browserContext).close();
+        verify(browser).close();
+        verify(playwright).close();
+    }
+
+    @Test
+    public void testCountOfBrowserContext() {
+        int count = browserFactory.countOfBrowserContext(browser);
+
+        assertEquals(1, count);
+    }
+
+    @Test
+    public void testIsBrowserConnected() {
+        boolean isConnected = browserFactory.isBrowserConnected(browser);
+
+        assertTrue(isConnected);
     }
 }
