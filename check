@@ -1,0 +1,9 @@
+ @Bean
+    public ResourcePropertySource locatorProperties() throws IOException {
+        Map<String, Object> mergedProperties = new HashMap<>();
+        for (String file : locatorFiles) {
+            ResourcePropertySource propertySource = new ResourcePropertySource(file);
+            propertySource.getSource().forEach((key, value) -> mergedProperties.putIfAbsent(key.toString(), value));
+        }
+        return new ResourcePropertySource("mergedLocatorProperties", mergedProperties);
+    }
