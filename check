@@ -1,9 +1,51 @@
- @Bean
-    public ResourcePropertySource locatorProperties() throws IOException {
-        Map<String, Object> mergedProperties = new HashMap<>();
-        for (String file : locatorFiles) {
-            ResourcePropertySource propertySource = new ResourcePropertySource(file);
-            propertySource.getSource().forEach((key, value) -> mergedProperties.putIfAbsent(key.toString(), value));
-        }
-        return new ResourcePropertySource("mergedLocatorProperties", mergedProperties);
+
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.context.annotation.Bean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+@Configuration
+@ConfigurationProperties(prefix = "app.locator")
+public class LocatorProperties {
+
+    private Map<String, String> values = new HashMap<>();
+
+    @Value("${locator.files:}")
+    private String[] yamlFiles;
+
+    public Map<String, String> getValues() {
+        return values;
     }
+
+    public void setValues(Map<String, String> values) {
+        this.values = values;
+    }
+
+    @Bean
+    public Map<String, String> loadYamlProperties() throws IOException {
+        if (yamlFiles != null) {
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            for (String yamlFile : yamlFiles) {
+                Resource resource = resolver.getResource(yamlFile);
+                if (resource.exists()) {
+                    YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();
+                    yamlFactory.setResources(resource);
+                    Properties properties = yamlFactory.getObject();
+                    for (String key : properties.stringPropertyNames()) {
+                        values.put(key, properties.getProperty(key));
+                    }
+                }
+            }
+        }
+        return values;
+    }
+}
