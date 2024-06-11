@@ -1,89 +1,44 @@
-import com.microsoft.playwright.*;
-import io.cucumber.spring.ScenarioScope;
-import net.jpmc.tesautotools.spartan.webpro.core.config.TESPlayriteProperties;
-import net.jpmc.tesautotools.spartan.webpro.core.framework.BrowserCategory;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.test.context.junit4.SpringRunner;
+package com.jpmc.parent.config;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-@RunWith(SpringRunner.class)
-@ScenarioScope
-public class BrowserFactoryTest {
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
-    @InjectMocks
-    private BrowserFactory browserFactory;
+@Configuration
+@ConfigurationProperties(prefix = "app.locator")
+public class LocatorProperties {
+    private Map<String, String> values = new HashMap<>();
 
-    @Mock
-    private TESPlayriteProperties tesPlayriteProperties;
-
-    @Mock
-    private Playwright playwright;
-
-    @Mock
-    private Playwright.BrowserType browserType;
-
-    @Mock
-    private Browser browser;
-
-    @Mock
-    private BrowserContext browserContext;
-
-    @Mock
-    private Page page;
-
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-        when(playwright.chromium()).thenReturn(browserType);
-        when(browserType.launch(any())).thenReturn(browser);
-        when(browser.newContext()).thenReturn(browserContext);
-        when(browserContext.newPage()).thenReturn(page);
+    public Map<String, String> getValues() {
+        return values;
     }
 
-    @Test
-    public void testGetBrowser() {
-        TESPlayriteProperties.Playrite playrite = new TESPlayriteProperties.Playrite();
-        playrite.setBrowser(BrowserCategory.chrome);
-        playrite.setHeadless(true);
-
-        when(tesPlayriteProperties.getPlayrite()).thenReturn(playrite);
-
-        Page result = browserFactory.getBrowser(playrite.getBrowser(), playrite.isHeadless());
-
-        assertNotNull(result);
+    public void setValues(Map<String, String> values) {
+        this.values = values;
     }
 
-    @Test
-    public void testCleanContext() {
-        browserFactory.cleanContext();
-
-        verify(browserContext).close();
-        verify(browser).close();
-        verify(playwright).close();
-    }
-
-    @Test
-    public void testCountOfBrowserContext() {
-        when(browser.contexts().size()).thenReturn(1);
-
-        int count = browserFactory.countOfBrowserContext(browser);
-
-        assertEquals(1, count);
-    }
-
-    @Test
-    public void testIsBrowserConnected() {
-        when(browser.isConnected()).thenReturn(true);
-
-        boolean isConnected = browserFactory.isBrowserConnected(browser);
-
-        assertTrue(isConnected);
+    @Bean
+    public void loadYamlProperties(@Value("${locator.files}") String[] yamlFiles) throws IOException {
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        for (String yamlFile : yamlFiles) {
+            Resource resource = resolver.getResource(yamlFile);
+            if (resource.exists()) {
+                YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();
+                yamlFactory.setResources(resource);
+                Properties properties = yamlFactory.getObject();
+                for (String key : properties.stringPropertyNames()) {
+                    values.put(key, properties.getProperty(key));
+                }
+            }
+        }
     }
 }
