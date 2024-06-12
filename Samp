@@ -1,26 +1,17 @@
 
 
-@Bean
-public Map<String, String> loadYamlProperties() throws IOException {
-    if (files != null && files.length > 0) {
-        System.out.println("YAML files found in locator.files: " + String.join(", ", files));
-        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        for (String yamlFile : files) {
-            System.out.println("Loading YAML file: " + yamlFile);
-            Resource resource = resolver.getResource(yamlFile);
-            if (resource.exists()) {
-                YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();
-                yamlFactory.setResources(resource);
-                Properties properties = yamlFactory.getObject();
-                for (String key : properties.stringPropertyNames()) {
-                    values.put(key, properties.getProperty(key));
-                }
-            } else {
-                System.out.println("YAML file not found: " + yamlFile);
-            }
-        }
-    } else {
-        System.out.println("No YAML files found in locator.files");
+
+
+@SpringBootTest
+public class LocatorPropertiesTest {
+
+    @Autowired
+    private LocatorProperties locatorProperties;
+
+    @Test
+    public void testLoadYamlProperties() {
+        Map<String, String> values = locatorProperties.getValues();
+        assertFalse(values.isEmpty(), "Properties should be loaded");
+        System.out.println("Loaded properties: " + values);
     }
-    return values;
 }
