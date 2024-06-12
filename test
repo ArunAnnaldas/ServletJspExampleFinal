@@ -1,0 +1,42 @@
+
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class LocatorPropertiesTest {
+
+    private LocatorProperties locatorProperties;
+
+    @BeforeEach
+    public void setUp() {
+        locatorProperties = new LocatorProperties();
+        locatorProperties.setFiles(new String[]{"classpath:/config/locator.yaml", "classpath:/config/locator2.yaml"});
+    }
+
+    @Test
+    public void testLoadYamlProperties() throws IOException {
+        Map<String, String> properties = locatorProperties.loadYamlProperties(locatorProperties.getFiles());
+        assertNotNull(properties);
+        assertEquals("value1", properties.get("key1"));
+        assertEquals("value2", properties.get("key2"));
+    }
+
+    @Test
+    public void testGetPrefixedValue() throws IOException {
+        locatorProperties.setValues(locatorProperties.loadYamlProperties(locatorProperties.getFiles()));
+        String value = locatorProperties.getPrefixedValue("key1");
+        assertEquals("value1", value);
+    }
+
+    @Test
+    public void testAppUrl() throws IOException {
+        locatorProperties.setValues(locatorProperties.loadYamlProperties(locatorProperties.getFiles()));
+        assertEquals("http://dev.example.com", locatorProperties.getAppUrl());
+    }
+}
