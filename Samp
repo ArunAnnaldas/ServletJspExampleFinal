@@ -1,0 +1,58 @@
+
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
+import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.context.annotation.Bean;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+
+@Configuration
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix = "locator")
+public class LocatorProperties {
+
+    private Map<String, String> values = new HashMap<>();
+
+    @Value("${locator.files:}")
+    private String[] yamlFiles;
+
+    public Map<String, String> getValues() {
+        return values;
+    }
+
+    public void setValues(Map<String, String> values) {
+        this.values = values;
+    }
+
+    @Bean
+    public Map<String, String> loadYamlProperties() throws IOException {
+        if (yamlFiles != null && yamlFiles.length > 0) {
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            for (String yamlFile : yamlFiles) {
+                System.out.println("Loading YAML file: " + yamlFile);
+                Resource resource = resolver.getResource(yamlFile);
+                if (resource.exists()) {
+                    YamlPropertiesFactoryBean yamlFactory = new YamlPropertiesFactoryBean();
+                    yamlFactory.setResources(resource);
+                    Properties properties = yamlFactory.getObject();
+                    for (String key : properties.stringPropertyNames()) {
+                        values.put(key, properties.getProperty(key));
+                    }
+                } else {
+                    System.out.println("YAML file not found: " + yamlFile);
+                }
+            }
+        } else {
+            System.out.println("No YAML files found in locator.files");
+        }
+        return values;
+    }
+}
