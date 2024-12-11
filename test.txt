@@ -1,0 +1,6 @@
+opment for a centralized team, driving transformation to modern infrastructure.
+Innovation in Delivery Acceleration: Engineered utilities for faster delivery, including Canary setup in cloud environments with integrated observability and monitoring.
+CI/CD Transformation: Guided multiple project teams in adopting CI/CD models, enhancing development efficiency and reducing release cycles.
+Test Automation Excellence: Advocated and implemented best practices for Test Automation, promoting reusable, scalable, and maintainable automation frameworks.
+Custom Reconciliation Tools: Designed and deployed bespoke reconciliation testing tools for migration projects, ensuring seamless data integrity and consistency.
+Technical Training & Enablement: Trained and upskilled project teams on modern tools, technologies, and automation frameworks, fostering technical excellence and self-sufficiency.
