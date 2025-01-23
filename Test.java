@@ -1,34 +1,27 @@
-import com.microsoft.playwright.*;
+import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import java.net.URL;
 
-public class PlaywrightWithSeleniumGrid {
-    public static void main(String[] args) {
-        // Selenium Grid URL
-        String seleniumGridUrl = "http://localhost:4444/wd/hub";
+public class FetchCdpUrl {
+    public static String getDevtoolsUrl() {
+        try {
+            // Set capabilities for Chromium browser
+            DesiredCapabilities capabilities = new DesiredCapabilities();
+            capabilities.setCapability("browserName", "chrome");
 
-        // Browser session ID (fetch this dynamically or use the session started from Grid)
-        String browserCdpUrl = "ws://localhost:4444/devtools/browser/<browser_id>"; // Replace <browser_id>
+            // Start WebDriver session on Selenium Grid
+            RemoteWebDriver driver = new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), capabilities);
 
-        // Connect to Selenium Grid via CDP
-        try (Playwright playwright = Playwright.create()) {
-            // Connect to the browser session
-            Browser browser = playwright.chromium().connectOverCDP(browserCdpUrl);
+            // Fetch CDP URL from session details
+            String cdpUrl = driver.getCapabilities().getCapability("se:cdp").toString();
 
-            // Create a new browser context
-            BrowserContext context = browser.newContext();
+            // Quit the WebDriver session
+            driver.quit();
 
-            // Open a new page
-            Page page = context.newPage();
-
-            // Navigate to a URL
-            page.navigate("https://example.com");
-
-            // Print the title of the page
-            System.out.println("Page Title: " + page.title());
-
-            // Close the browser
-            browser.close();
+            return cdpUrl;
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
 }
