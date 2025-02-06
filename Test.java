@@ -1,6 +1,6 @@
-def highlight_differences(pdf_path, differences, output_path):
+def highlight_differences_debug(pdf_path, differences, output_path):
     """
-    Highlights differences in the PDF and saves it.
+    Debug version: Highlights differences in the PDF and logs the search results.
 
     Args:
         pdf_path (str): Original PDF.
@@ -10,12 +10,20 @@ def highlight_differences(pdf_path, differences, output_path):
     doc = fitz.open(pdf_path)
     for page_num, diffs in differences.items():
         page = doc.load_page(page_num - 1)
+        
+        print(f"\n🔍 Debugging Page {page_num}:")
+
         for diff in diffs:
-            text_instances = page.search_for(diff.strip())  # Strip spaces
-            if not text_instances:
-                print(f"⚠️ No match found for: {diff} on Page {page_num}")
-            for inst in text_instances:
-                highlight = page.add_highlight_annot(inst)
-                highlight.update()
+            diff_clean = diff.strip()
+            text_instances = page.search_for(diff_clean)
+
+            if text_instances:
+                print(f"✅ Found: '{diff_clean}' on Page {page_num}")
+                for inst in text_instances:
+                    highlight = page.add_highlight_annot(inst)
+                    highlight.update()
+            else:
+                print(f"❌ Not Found: '{diff_clean}' on Page {page_num}")
+
     doc.save(output_path)
     print(f"✅ Differences highlighted in: {output_path}")
