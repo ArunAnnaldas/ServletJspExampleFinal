@@ -1,19 +1,21 @@
-import fitz  # PyMuPDF
+def highlight_differences(pdf_path, differences, output_path):
+    """
+    Highlights differences in the PDF and saves it.
 
-def debug_extract_text(pdf_path):
-    """ Extract and print text from a PDF file for debugging. """
+    Args:
+        pdf_path (str): Original PDF.
+        differences (dict): Differences detected.
+        output_path (str): Path to save the highlighted PDF.
+    """
     doc = fitz.open(pdf_path)
-    for page_num in range(len(doc)):
-        page = doc.load_page(page_num)
-        text = page.get_text("text")  # Extract text
-        print(f"\n--- Page {page_num + 1} ---\n")
-        print(text)
-
-pdf1 = "path/to/first.pdf"
-pdf2 = "path/to/second.pdf"
-
-print("Extracted text from PDF 1:")
-debug_extract_text(pdf1)
-
-print("\nExtracted text from PDF 2:")
-debug_extract_text(pdf2)
+    for page_num, diffs in differences.items():
+        page = doc.load_page(page_num - 1)
+        for diff in diffs:
+            text_instances = page.search_for(diff.strip())  # Strip spaces
+            if not text_instances:
+                print(f"⚠️ No match found for: {diff} on Page {page_num}")
+            for inst in text_instances:
+                highlight = page.add_highlight_annot(inst)
+                highlight.update()
+    doc.save(output_path)
+    print(f"✅ Differences highlighted in: {output_path}")
