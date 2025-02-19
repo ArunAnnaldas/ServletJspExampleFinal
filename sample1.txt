@@ -1,0 +1,49 @@
+Step 1: Load the PDF
+Open the PDF file using a PDF processing library.
+Iterate through each page.
+Step 2: Extract Text with Coordinates
+Extract text along with its coordinates (X, Y positions).
+Sort the extracted text by Y-coordinates to maintain proper reading order.
+Step 3: Identify Blank Lines
+Initialize a variable to store the previous Y-coordinate.
+Iterate through the extracted text blocks:
+If this is the first block, store the Y-coordinate.
+Otherwise, compare the current block's Y-coordinate with the previous block.
+If the gap between two consecutive Y-coordinates is greater than a threshold (e.g., 20 pixels), mark it as a blank line.
+Update the previous Y-coordinate.
+Step 4: Handle Edge Cases
+If the text is extracted with newline characters (\n\n), detect blank lines by checking for consecutive empty lines.
+If the PDF contains images instead of selectable text, apply OCR (Optical Character Recognition) before processing.
+Step 5: Output Blank Line Locations
+Print or return a list of blank line positions.
+Optionally, highlight blank lines in the PDF for visualization.
+
+
+
+START
+
+1. Load the PDF file.
+2. For each page in the PDF:
+    a. Extract text along with coordinates (X, Y).
+    b. Sort extracted text blocks by Y-coordinates.
+
+3. Initialize `previous_y = None`.
+
+4. For each text block:
+    a. Get the current Y-coordinate (`current_y`).
+    b. If `previous_y` is not None:
+        - Calculate `gap = current_y - previous_y`
+        - If `gap > THRESHOLD` (e.g., 20 pixels):
+            - Mark this as a "Blank Line".
+    c. Update `previous_y = current_y`.
+
+5. If using raw text extraction:
+    a. Extract text as a string.
+    b. Split text into lines.
+    c. For each line:
+        - If the line is empty or contains only spaces:
+            - Mark as a "Blank Line".
+
+6. Return or print all detected blank lines.
+
+END
